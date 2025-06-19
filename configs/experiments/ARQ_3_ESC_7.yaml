@@ -8,22 +8,22 @@ _base_: default.yaml
 # ---------------------------------------------------------------------
 experiment:
   ## Nombre único y corto (carpetas, TensorBoard, etc.)
-  name:        "ARQ_1__ESC_9"                   # p.ej. "exp_model1_b"
+  name:        "ARQ_3__ESC_7"                   # p.ej. "exp_model1_b"
 
   ## Descripción legible (se muestra en logs)
-  description: "ARQUITECTURA 1: CNN BILSTM ATTN => ESCENARIO 9"
+  description: "ARQUITECTURA 3: RES TCN SE => ESCENARIO 7"
 
   ## Módulo (.py) dentro de structure/models/
-  model_module: "cnn_bilstm_attn"              
+  model_module: "res_tcn_se"              
 
   ## Clase dentro del módulo (debe heredar de tu BaseTFModel)
   model_class:  "NN"                # Siempre debe ser "NN"
 
   ## Directorio raíz donde guardar salidas (se crea en runtime)
-  output_root:  "outputs/ARQ_1"
+  output_root:  "outputs/ARQ_3"
 
   ## Subcarpeta específica de este experimento
-  output_subdir: "ESC_9"              # p.ej. "model1_b"
+  output_subdir: "ESC_7"              # p.ej. "model1_b"
   
   repeats: 10
 
@@ -38,12 +38,12 @@ dataset:
   
   kaggle:     
     train:
-      dataset_id:  "carlosandres069/6mods-6clases-esc-9"   
-      download_dir: "datasets/kaggle/ESC_9"           
+      dataset_id:  "carlosandres069/6mods-6clases-esc-7"   
+      download_dir: "datasets/kaggle/ESC_7"           
 
     test:
-      dataset_id:  "carlosandres069/6mods-6clases-esc-9-test"    
-      download_dir: "datasets/kaggle/TEST_ESC_9"             
+      dataset_id:  "carlosandres069/6mods-6clases-esc-7-test"    
+      download_dir: "datasets/kaggle/TEST_ESC_7"             
 
     file_pattern: "*.hdf5"    
 
@@ -63,36 +63,29 @@ dataset:
 # ---------------------------------------------------------------------
 model:
   params:
-    seq_len:      4096 
-    n_classes:    6         
-
-    # CNN frontend
-    conv_filters:      [64, 128, 128]   # tres bloques Conv1D
-    conv_kernels:      [7, 5, 3]        # longitud de kernel por bloque
-    conv_strides:      [2, 1, 1]        # stride por bloque
-    pool_stride:       2                # MaxPooling1D al final del front-end
-
-    # Recurrente
-    bi_lstm_units:     256              # si quieres dos capas: [384, 256]
-
-    # Attention
-    atten_units:       128
-
-    # Clasificador
-    dense_units:       128              # capa densa posterior a atención
-    dropout:           0.35             # prob. de apagado antes de softmax
-    act_dense:         relu             # activación de la capa densa
+    seq_len:            4096          # nº muestras por señal
+    n_classes:          6             # ≡ len(class_names)
+    inception_filters:  64
+    pool_size:          4
+    res_filters:        [128, 256]
+    dilation_rates:     [1, 2]
+    num_heads:          2
+    key_dim:            16
+    attn_dropout:       0.1
+    ffn_units:          256
+    dense_units:        256
+    dropout:            0.3
 
 
 # ---------------------------------------------------------------------
 # 4) ENTRENAMIENTO
 # ---------------------------------------------------------------------
 training:
-  batch_size:    32
-  epochs:        150                  
+  batch_size: 32
+  epochs: 150
   learning_rate: 1e-3
-  patience:      10                  
-  seed:          4209
+  patience: 15
+  seed: 4207
 
 
 # ---------------------------------------------------------------------

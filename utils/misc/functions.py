@@ -32,14 +32,9 @@ def print_exp_configuration(cfg: dict):
 
     # ───────────────────── 2) DATASET ────────────────────────
     ds = cfg["dataset"]
-    if ds["source"] == "kaggle":
-        src_label = "Kaggle"
-        ruta  = ds["kaggle"].get("dataset_id", "-")
-        extra = ds["kaggle"].get("download_dir", "-")
-    else:                                # source == 'local'
-        src_label = "Local"
-        ruta  = ds.get("local_path", "-")
-        extra = "-"
+    src_label = "Kaggle"
+    ruta  = '[TRAIN] ' + ds["kaggle"].get("train", {}).get("dataset_id", "-") + " | [TEST] " + ds["kaggle"].get("test", {}).get("dataset_id", "-")
+    extra = '[TRAIN] ' + ds["kaggle"].get("train", {}).get("download_dir", "-") + " | [TEST] " + ds["kaggle"].get("test", {}).get("download_dir", "-")
 
     ds_info = [
         ["Fuente",       src_label],

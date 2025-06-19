@@ -92,10 +92,10 @@ def load_experiment(
     bs = cfg["training"].get("batch_size", 32)
 
     train_ds = datamodule.to_tf_dataset(
-        split="train", batch_size=bs, shuffle=True,  prefetch=True, seed=seed
+        split="train", batch_size=bs, shuffle=True,  prefetch=True
     )
     val_ds   = datamodule.to_tf_dataset(
-        split="val",   batch_size=bs, shuffle=False, prefetch=True, seed=seed
+        split="val",   batch_size=bs, shuffle=False, prefetch=True
     )
     test_ds_idx = datamodule.to_tf_dataset(
         split="test", batch_size=bs,

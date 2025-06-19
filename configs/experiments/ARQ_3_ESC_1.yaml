@@ -43,7 +43,7 @@ dataset:
 
     test:
       dataset_id:  "carlosandres069/6mods-6clases-esc-1-test"    
-      download_dir: "datasets/kaggle/ESC_1"             
+      download_dir: "datasets/kaggle/TEST_ESC_1"             
 
     file_pattern: "*.hdf5"    
 

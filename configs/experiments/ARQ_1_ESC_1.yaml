@@ -13,8 +13,8 @@ experiment:
   ## Descripción legible (se muestra en logs)
   description: "ARQUITECTURA 1: CNN BILSTM ATTN => ESCENARIO 1"
 
-  ## Módulo (.ipynb) dentro de structure/models/
-  model_module: "cnn_bilstm_attn"               # p.ej. "model1"
+  ## Módulo (.py) dentro de structure/models/
+  model_module: "cnn_bilstm_attn"              
 
   ## Clase dentro del módulo (debe heredar de tu BaseTFModel)
   model_class:  "NN"                # Siempre debe ser "NN"
@@ -32,21 +32,20 @@ experiment:
 # 2) DATASET
 # ---------------------------------------------------------------------
 dataset:
-  source: "kaggle"                            # "local" | "kaggle"
 
-  ## Ruta relativa dentro de structure/datasets (solo si source=="local")
-  local_path: "-"                             # ej. "raw/mi_dataset.hdf5"
+  train_pct: 0.8  # Train/Val
+  keys: {"X": "X", "Y": "Y", "Z": "Z"}
+  
+  kaggle:     
+    train:
+      dataset_id:  "carlosandres069/6mods-6clases-esc-1"   
+      download_dir: "datasets/kaggle/ESC_1"           
 
-  kaggle:                                     # solo si source=="kaggle"
-    dataset_id:  "carlosandres069/6mods-6clases-esc-1"   # ej. "user/snr8-12-taps2-phase0"
-    download_dir: "datasets/kaggle/ESC_1"           # carpeta local donde guardar
-    file_pattern: "*.hdf5"                    # glob para elegir el archivo
+    test:
+      dataset_id:  "carlosandres069/6mods-6clases-esc-1-test"    
+      download_dir: "datasets/kaggle/TEST_ESC_1"             
 
-  ## Mapping de llaves dentro del HDF5 (normalmente no se cambia)
-  keys:
-    X: "X"
-    Y: "Y"
-    Z: "Z"
+    file_pattern: "*.hdf5"    
 
   ## Nombres de clases (orden == índices)
   class_names:
@@ -56,15 +55,8 @@ dataset:
     - "32qam cross"
     - "64qam"
     - "128qam cross"
-    
-  ## Porcentaje del Dataset para testeo
-  test_pct: 0
 
-  ## División train / val  (ignorado si usas k_folds)
-  train_pct: 0.8
 
-  ## Validación cruzada: pon número (k) o null
-  k_folds:   null
 
 # ---------------------------------------------------------------------
 # 3) MODELO  (hiperparámetros del NN)
@@ -90,6 +82,7 @@ model:
     dense_units:       128              # capa densa posterior a atención
     dropout:           0.35             # prob. de apagado antes de softmax
     act_dense:         relu             # activación de la capa densa
+
 
 # ---------------------------------------------------------------------
 # 4) ENTRENAMIENTO

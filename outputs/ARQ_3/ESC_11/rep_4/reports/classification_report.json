@@ -1,0 +1,62 @@
+{
+  "experiment": {
+    "name": "ARQ_3__ESC_11",
+    "timestamp": "2025-06-19T22:54:22.922376",
+    "repeat_index": 4
+  },
+  "evaluation": {
+    "loss": 0.1339043229818344,
+    "accuracy": 0.9651692509651184
+  },
+  "classification_report": {
+    "bpsk": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1024.0
+    },
+    "qpsk": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1024.0
+    },
+    "16qam": {
+      "precision": 0.9941291585127201,
+      "recall": 0.9921875,
+      "f1-score": 0.9931573802541545,
+      "support": 1024.0
+    },
+    "32qam cross": {
+      "precision": 0.8928909952606635,
+      "recall": 0.919921875,
+      "f1-score": 0.9062049062049062,
+      "support": 1024.0
+    },
+    "64qam": {
+      "precision": 0.9845410628019323,
+      "recall": 0.9951171875,
+      "f1-score": 0.9898008742107819,
+      "support": 1024.0
+    },
+    "128qam cross": {
+      "precision": 0.9197154471544715,
+      "recall": 0.8837890625,
+      "f1-score": 0.901394422310757,
+      "support": 1024.0
+    },
+    "accuracy": 0.9651692708333334,
+    "macro avg": {
+      "precision": 0.965212777288298,
+      "recall": 0.9651692708333334,
+      "f1-score": 0.9650929304967666,
+      "support": 6144.0
+    },
+    "weighted avg": {
+      "precision": 0.965212777288298,
+      "recall": 0.9651692708333334,
+      "f1-score": 0.9650929304967666,
+      "support": 6144.0
+    }
+  }
+}

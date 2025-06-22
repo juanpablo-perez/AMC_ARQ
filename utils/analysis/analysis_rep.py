@@ -26,7 +26,7 @@ class ExperimentRepAnalyzer:
              'output_root', 'output_subdir'}
         """
         # --- Inicialización de rutas y flags ---
-        self.BASE_DIR = Path('/content/drive/MyDrive/structure')
+        self.BASE_DIR = Path().resolve()
         self.cfg = cfg
         exp_cfg = self.cfg.get('experiment', {})
 

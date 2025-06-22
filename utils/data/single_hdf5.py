@@ -88,7 +88,7 @@ class SingleHDF5:
         self.train_idx = np.asarray(train_idx, dtype=np.int64)
         self.val_idx   = np.asarray(val_idx,   dtype=np.int64)
 
-    def get_arrays(self, split: str | None = None):
+    def get_arrays(self, split: str = None):
         if split is None: return self.X, self.Y
         split = split.lower()
         if split == "train": return self.X[self.train_idx], self.Y[self.train_idx]
@@ -99,8 +99,8 @@ class SingleHDF5:
     def get_effects(
         self,
         *,
-        split: str | None = None,
-        fields: list[str] | None = None,
+        split: str = None,
+        fields: list = None,
     ):
         """
         Devuelve un structured-array con los efectos alineados al `split`.
@@ -140,13 +140,13 @@ class SingleHDF5:
     def to_tf_dataset(
         self,
         *,                                      
-        split: str | None = None,
+        split: str = None,
         batch_size: int,
         shuffle: bool = True,
         seed: int,
         prefetch: bool = True,
         include_index: bool = False,
-        buffer_size: int | None = None,
+        buffer_size: int = None,
     ):
         """
         Devuelve un tf.data.Dataset con (X, Y) o (X, Y, idx).

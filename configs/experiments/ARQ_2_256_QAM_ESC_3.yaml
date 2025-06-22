@@ -1,0 +1,98 @@
+# =====================================================================
+#  CONFIGURACIÓN BASE  ─  Clona y personaliza para cada experimento
+# =====================================================================
+_base_: default.yaml
+
+# ---------------------------------------------------------------------
+# 1) EXPERIMENTO
+# ---------------------------------------------------------------------
+experiment:
+  ## Nombre único y corto (carpetas, TensorBoard, etc.)
+  name:        "ARQ_2__ESC_3_WITH_256_QAM"                   # p.ej. "exp_model1_b"
+
+  ## Descripción legible (se muestra en logs)
+  description: "ARQUITECTURA 2: RED CARLOS => ESCENARIO 3 CON 256 QAM"
+
+  ## Módulo (.py) dentro de structure/models/
+  model_module: "red_carlos"              
+
+  ## Clase dentro del módulo (debe heredar de tu BaseTFModel)
+  model_class:  "NN"                # Siempre debe ser "NN"
+
+  ## Directorio raíz donde guardar salidas (se crea en runtime)
+  output_root:  "outputs/ARQ_2"
+
+  ## Subcarpeta específica de este experimento
+  output_subdir: "ESC_3_WITH_256_QAM"              # p.ej. "model1_b"
+
+  
+  repeats: 10
+
+
+# ---------------------------------------------------------------------
+# 2) DATASET
+# ---------------------------------------------------------------------
+dataset:
+
+  train_pct: 0.8  # Train/Val
+  keys: {"X": "X", "Y": "Y", "Z": "Z"}
+  
+  kaggle:     
+    train:
+      dataset_id:  "carlosandres069/7mods-7clases-esc-3"   
+      download_dir: "datasets/kaggle/ESC_3_WITH_256_QAM"           
+
+    test:
+      dataset_id:  "carlosandres069/7mods-7clases-esc-3-test"    
+      download_dir: "datasets/kaggle/TEST_ESC_3_WITH_256_QAM"             
+
+    file_pattern: "*.hdf5"    
+
+  ## Nombres de clases (orden == índices)
+  class_names:
+    - "bpsk"
+    - "qpsk"
+    - "16qam"
+    - "32qam cross"
+    - "64qam"
+    - "128qam cross"
+    - "256qam"
+
+
+# ---------------------------------------------------------------------
+# 3) MODELO  (hiperparámetros del NN)
+# ---------------------------------------------------------------------
+model:
+  params:
+    seq_len:            4096          # nº muestras por señal
+    n_classes:          7             # ≡ len(class_names)
+    filters:            32
+    num_heads:          2
+    key_dim:            16
+    regularizer:        2e-4
+    dense:              14
+    dropout:            0.3
+    pooling:            2
+
+
+# ---------------------------------------------------------------------
+# 4) ENTRENAMIENTO
+# ---------------------------------------------------------------------
+training:
+  batch_size:    32
+  epochs:        150
+  learning_rate: 1e-3
+  patience:      10
+  seed:          4203
+
+
+# ---------------------------------------------------------------------
+# 5) RUTAS AUXILIARES
+# ---------------------------------------------------------------------
+paths:
+  logs_dir:        "logs"                 # TensorBoard y CSVLogger
+  checkpoints_dir: "models/checkpoints"   # pesos .keras
+
+# =====================================================================
+#    FIN DEL TEMPLATE   –  Duplica → edita → corre tu experimento
+# =====================================================================

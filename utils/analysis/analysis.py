@@ -59,7 +59,7 @@ class ExperimentAnalyzer:
             self.fold_index = None
         
         
-        self.BASE_DIR = Path('/content/drive/MyDrive/structure')
+        self.BASE_DIR = Path().resolve()
         exp_cfg = self.cfg.get('experiment', {})
         self.output_dir = (
             self.BASE_DIR

@@ -2,10 +2,10 @@ from pathlib import Path
 from tabulate import tabulate
 
 # Rutas base en Drive 
-CONFIG_ROOT = Path('/content/drive/MyDrive/structure/configs')
-MODELS_ROOT = Path('/content/drive/MyDrive/structure/models')
-DATA_ROOT   = Path('/content/drive/MyDrive/structure/datasets')
-
+BASE_DIR = Path().resolve() 
+CONFIG_ROOT = BASE_DIR / "configs"
+MODELS_ROOT = BASE_DIR / "models"
+DATA_ROOT   = BASE_DIR / "datasets"
 
 def print_exp_configuration(cfg: dict):
     """

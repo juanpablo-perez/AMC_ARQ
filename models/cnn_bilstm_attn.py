@@ -5,6 +5,7 @@ from models.base_model import BaseTFModel
 class AttentionPool(layers.Layer):
     def __init__(self, units):
         super().__init__()
+        self.units = units
         self.W = layers.Dense(units, activation='tanh')
         self.v = layers.Dense(1)
 
@@ -12,7 +13,11 @@ class AttentionPool(layers.Layer):
         score = self.v(self.W(features))         # [B, T, 1]
         weights = tf.nn.softmax(score, axis=1)   # atención temporal
         return tf.reduce_sum(features * weights, axis=1)
-
+    def get_config(self):
+        config = super().get_config()
+        config.update({'units': self.units})
+        return config
+    
 class NN(BaseTFModel):
     def build_model(self):
         mp   = self.model_params             # ← dict model.params del YAML

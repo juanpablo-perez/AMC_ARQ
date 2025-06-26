@@ -123,39 +123,87 @@ class ExperimentAnalyzer:
         plt.tight_layout()
         plt.show()
 
-    def confusion_matrix(self, normalize: str | None = None, show_plots: bool = True) -> None:
-        """Dibuja y guarda la matriz de confusión opcionalmente normalizada."""
+    def confusion_matrix(
+            self,
+            normalize: str | None = None,   # {'true', 'pred', 'all', None}
+            show_plots: bool = True,
+            save_json: bool = True,
+        ) -> None:
+        """
+        Dibuja la matriz de confusión y guarda:
+        • confusion_matrix.png
+        • confusion_matrix.json   ← con **conteos absolutos** (y versión normalizada)
+
+        Parámetros
+        ----------
+        normalize : {'true', 'pred', 'all', None}
+            Igual que en `sklearn.metrics.confusion_matrix`.  Se usa solo para
+            la visualización; en el JSON siempre se guardan los conteos brutos.
+        show_plots : bool
+            Muestra la figura en pantalla si es True.
+        save_json : bool
+            Guarda el JSON si es True.
+        """
+        # ── 1) Predicciones y etiquetas ──────────────────────────────────
         y_pred = self._predict_classes(self.X_val)
         labels = (
             list(range(len(self.class_names)))
             if self.class_names
             else np.unique(np.concatenate([self.y_val, y_pred])).tolist()
         )
-        cm = confusion_matrix(
-            self.y_val, y_pred,
-            labels=labels,
-            normalize=normalize
-        )
-        disp = ConfusionMatrixDisplay(
-            cm,
-            display_labels=self.class_names or labels
-        )
+
+        # Matriz **sin** normalizar (para agregación futura)
+        cm_counts = confusion_matrix(self.y_val, y_pred, labels=labels, normalize=None)
+
+        # Matriz para mostrar (normalizada o no, según el parámetro)
+        cm_plot = (confusion_matrix(self.y_val, y_pred,
+                                    labels=labels, normalize=normalize)
+                if normalize else cm_counts)
+
+        # ── 2) Plot ──────────────────────────────────────────────────────
+        disp = ConfusionMatrixDisplay(cm_plot,
+                                    display_labels=self.class_names or labels)
         fig, ax = plt.subplots(figsize=(7, 7))
         disp.plot(ax=ax, cmap="Blues", xticks_rotation=90, colorbar=False)
+
         title = "Matriz de Confusión"
         if normalize:
             title += f" (normalizada={normalize})"
         ax.set_title(title)
 
-        if self.show_plots == True:
+        if self.show_plots and show_plots:
             plt.show()
-            
-        # Guardar
-        file_path = self.output_dir / "confusion_matrix.png"
-        fig.savefig(file_path, dpi=300, bbox_inches="tight")
+
+        png_path = self.output_dir / "confusion_matrix.png"
+        fig.savefig(png_path, dpi=300, bbox_inches="tight")
         plt.close(fig)
-        print(f"🔖 Guardado: {file_path}")
-        
+        print(f"🔖 Imagen guardada en: {png_path}")
+
+        # ── 3) JSON ──────────────────────────────────────────────────────
+        if save_json:
+            json_dict = {
+                "experiment": {
+                    "name":         self.cfg["experiment"]["name"],
+                    "timestamp":    datetime.now().isoformat(),
+                    "repeat_index": self.repeat_index,
+                },
+                "confusion_matrix": {
+                    "labels":        self.class_names or labels,
+                    "matrix_counts": cm_counts.tolist(),      # ← conteos absolutos
+                    "support":       cm_counts.sum(axis=1).tolist(),
+                    "normalize":     normalize,               # None, 'true', …
+                }
+            }
+            if normalize:
+                json_dict["confusion_matrix"]["matrix_normalized"] = cm_plot.tolist()
+            if self.fold_index is not None:
+                json_dict["experiment"]["fold_index"] = int(self.fold_index)
+
+            json_path = self.output_dir / "confusion_matrix.json"
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(json_dict, f, indent=2, ensure_ascii=False)
+            print(f"🔖 JSON guardado en: {json_path}")
+
         
 
     def classification_report(self) -> None:
@@ -360,6 +408,68 @@ class ExperimentAnalyzer:
 
         print(f"🔖 Effects report JSON guardado en: {json_path}")
 
+    # ──────────────────────────────────────────────────────────────────
+    def predictions_csv(self,
+                        save_probs: bool = False,
+                        batch_size: int = 128) -> Path:
+        """
+        Genera un CSV con índice de la señal, etiqueta esperada y predicha.
+        
+        Columnas básicas:
+        • idx          → índice original (si el Dataset lo provee; si no, 0..N-1)
+        • true_label   → entero
+        • pred_label   → entero
+        • true_class   → nombre de clase (si class_names está definido)
+        • pred_class   → nombre de clase (idem)
+
+        Opcional:
+        • p_<clase>    → probabilidad softmax de cada clase (save_probs=True)
+
+        Returns
+        -------
+        Path al CSV generado.
+        """
+        # 1) Índices de las muestras
+        if self.idx_val is not None:
+            idx_col = self.idx_val
+        else:
+            idx_col = np.arange(len(self.y_val))
+
+        # 2) Predicción del modelo
+        probs = self.model.predict(self.X_val,
+                                batch_size=batch_size,
+                                verbose=0)
+        y_pred = np.argmax(probs, axis=-1)
+
+        # 3) Construir DataFrame
+        df = pd.DataFrame({
+            "idx":        idx_col,
+            "true_label": self.y_val,
+            "pred_label": y_pred,
+        })
+
+        # 3.1) Mapear a nombres de clase (si existen)
+        if self.class_names:
+            df["true_class"] = df["true_label"].apply(
+                lambda i: self.class_names[i])
+            df["pred_class"] = df["pred_label"].apply(
+                lambda i: self.class_names[i])
+
+        # 3.2) Opcional: añadir probabilidades de cada clase
+        if save_probs:
+            if self.class_names:
+                col_names = [f"p_{c}" for c in self.class_names]
+            else:
+                col_names = [f"p_{i}" for i in range(probs.shape[1])]
+            probs_df = pd.DataFrame(probs, columns=col_names)
+            df = pd.concat([df, probs_df], axis=1)
+
+        # 4) Guardar
+        csv_path = self.output_dir / "predictions.csv"
+        df.to_csv(csv_path, index=False)
+        print(f"🔖 CSV de predicciones guardado en: {csv_path}")
+
+        return csv_path
 
     # ------------------------------------------------------------------ #
     #  MÉTODOS PRIVADOS

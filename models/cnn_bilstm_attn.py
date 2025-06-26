@@ -2,8 +2,9 @@ import tensorflow as tf
 from tensorflow.keras import layers
 from models.base_model import BaseTFModel
 
+@tf.keras.utils.register_keras_serializable(package="custom_layers")
 class AttentionPool(layers.Layer):
-    def __init__(self, units):
+    def __init__(self, units, **kwargs):
         super().__init__()
         self.units = units
         self.W = layers.Dense(units, activation='tanh')
